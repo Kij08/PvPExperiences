@@ -1,0 +1,24 @@
+name: PvPExperiences
+version: 0.0.1
+main: org.shinsha.pvpexperiences.PvPExperiences
+api-version: 1.21
+commands:
+  pvpedit:
+    description: Command to create, edit, and delete pvp regions
+    usage: "Usage: /<command> [begin|edit|save|saveas|savequit|quit]"
+    permission: PvPExperiences.edit
+    aliases:
+      - pe
+  pvpplay:
+    description: Command to create, edit, and delete pvp regions
+    usage: "Usage: /<command> [create|join]"
+    permission: PvPExperiences.join
+    aliases:
+      - pp
+permissions:
+  PvPExperiences.edit:
+    description: Lets players access the editing suite
+    default: op
+  PvPExperiences.join:
+    description: Lets players create and join lobbies
+    default: op
