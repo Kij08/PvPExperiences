@@ -22,16 +22,16 @@ public class PvPEditCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
-
+        MapManager mapManager = PvPExperiences.getPlugin().mapManager;
         if(commandSender instanceof Player p){
             if(args.length == 0){
-                p.sendMessage("Invalid arguements. /pvpexperiences [begin|edit|save|saveas|savequit|quit]");
+                p.sendMessage("Invalid arguements. /pvpexperiences [begin|edit|save|savequit|quit]");
             }
             else{
                 switch(args[0]){
                     case "begin":
-                        if(!PvPExperiences.getPlugin().isPlayerEditing(p)){
-                            PvPExperiences.getPlugin().RegisterEditingPlayer(p, new PvPMap("newMap", p.getWorld()));
+                        if(!mapManager.isPlayerEditing(p)){
+                            mapManager.RegisterEditingPlayer(p, new PvPMap("newMap", p.getWorld()));
                             SetupEditingPlayer(p);
 
                             p.sendMessage("Starting edit of map newMap");
@@ -47,20 +47,20 @@ public class PvPEditCommand implements CommandExecutor {
                             return true;
                         }
 
-                        if(PvPExperiences.getPlugin().isMapEditing(args[1])){
+                        if(mapManager.isMapEditing(args[1])){
                             p.sendMessage("This map is already being edited.");
                             return true;
                         }
 
-                        if(PvPExperiences.getPlugin().isPlayerEditing(p)){
+                        if(mapManager.isPlayerEditing(p)){
                             p.sendMessage("You are already editing a map.");
                             return true;
                         }
 
-                        PvPMap map = MapManager.GetMapFromFileName(args[1] + ".yml");
+                        PvPMap map = mapManager.GetMapFromName(args[1]);
 
                         if(map != null){
-                            PvPExperiences.getPlugin().RegisterEditingPlayer(p, map);
+                            mapManager.RegisterEditingPlayer(p, map);
                             SetupEditingPlayer(p);
                             map.setOutlineVisible(p);
                             p.teleport(map.getBound2());
@@ -71,13 +71,12 @@ public class PvPEditCommand implements CommandExecutor {
 
                         break;
                     case "save":
-                        Save(p);
-                        break;
-                    case "saveas":
-                        SaveAs(p, args[1]);
+                        if(args.length > 1){
+                            Save(p, args[1]);
+                        }
                         break;
                     case "savequit":
-                        Save(p);
+                        Save(p, mapManager.getEditingMap(p).getMapName());
                         Quit(p);
                         break;
                     case "quit":
@@ -120,22 +119,18 @@ public class PvPEditCommand implements CommandExecutor {
 
     }
 
-    private void Save(Player p){
-        FileFactory.WriteMapFile(PvPExperiences.getPlugin().getEditingMap(p));
-    }
-
-    private void SaveAs(Player p, String newName){
-        FileFactory.WriteMapFile(PvPExperiences.getPlugin().getEditingMap(p), newName);
+    private void Save(Player p, String newName){
+        PvPExperiences.getPlugin().mapManager.SaveMap(p, newName);
     }
 
     private void Quit(Player p){
-        if(PvPExperiences.getPlugin().isPlayerEditing(p)){
+        if(PvPExperiences.getPlugin().mapManager.isPlayerEditing(p)){
 
             //Clear map visualisers
-            PvPExperiences.getPlugin().getEditingMap(p).deleteOutline();
+            PvPExperiences.getPlugin().mapManager.getEditingMap(p).deleteOutline();
 
             //Reload player inventory
-            PvPExperiences.getPlugin().EndEditingPlayer(p);
+            PvPExperiences.getPlugin().mapManager.EndEditingPlayer(p);
             PvPExperiences.getPlugin().RetrievePlayerInventory(p);
 
             //Transition to gameplay state

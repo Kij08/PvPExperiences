@@ -18,11 +18,11 @@ public class PlayerInteractListener implements Listener {
 
         Player p = e.getPlayer();
 
-        if (!PvPExperiences.getPlugin().isPlayerEditing(p)) {
+        if (!PvPExperiences.getPlugin().mapManager.isPlayerEditing(p)) {
             return;
         }
 
-        PvPMap editingMap = PvPExperiences.getPlugin().getEditingMap(p);
+        PvPMap editingMap = PvPExperiences.getPlugin().mapManager.getEditingMap(p);
         ItemStack item = e.getItem();
         if(item != null){
             if(e.getAction() == Action.LEFT_CLICK_BLOCK){

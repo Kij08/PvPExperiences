@@ -50,9 +50,4 @@ public class SessionManager {
         return playerInSession;
     }
 
-    public static Set<String> GetMapList() throws IOException {
-        Stream<Path> maps = Files.list(Paths.get(FileFactory.mapFileDir));
-        return maps.filter(file -> !Files.isDirectory(file)).map(Path::getFileName).map(Path::toString).collect(Collectors.toSet());
-    }
-
 }

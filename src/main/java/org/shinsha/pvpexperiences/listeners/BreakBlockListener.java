@@ -8,7 +8,7 @@ import org.shinsha.pvpexperiences.PvPExperiences;
 public class BreakBlockListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e){
-        if(PvPExperiences.getPlugin().isPlayerEditing(e.getPlayer())){
+        if(PvPExperiences.getPlugin().mapManager.isPlayerEditing(e.getPlayer())){
             e.setCancelled(true);
         }
     }

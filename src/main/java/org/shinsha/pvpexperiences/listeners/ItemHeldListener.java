@@ -28,13 +28,13 @@ public class ItemHeldListener implements Listener {
     public void onPlayerHeld(PlayerItemHeldEvent e){
         Player p = e.getPlayer();
 
-        if (!PvPExperiences.getPlugin().isPlayerEditing(p)) {
+        if (!PvPExperiences.getPlugin().mapManager.isPlayerEditing(p)) {
             cleanupSpawnLocations();
 
             return;
         }
 
-        PvPMap editingMap = PvPExperiences.getPlugin().getEditingMap(p);
+        PvPMap editingMap = PvPExperiences.getPlugin().mapManager.getEditingMap(p);
 
         ItemStack prevItem = p.getInventory().getItem(e.getPreviousSlot());
         ItemStack newItem = p.getInventory().getItem(e.getNewSlot());

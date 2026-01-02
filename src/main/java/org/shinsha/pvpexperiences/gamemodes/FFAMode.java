@@ -1,5 +1,7 @@
 package org.shinsha.pvpexperiences.gamemodes;
 
+import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
 import org.shinsha.pvpexperiences.sessions.Session;
 
 public class FFAMode extends GameModeBase {
@@ -10,7 +12,12 @@ public class FFAMode extends GameModeBase {
 
     @Override
     public void StartGame(){
-
+        for(Player p : owningSession.GetActivePlayers()){
+            p.setGameMode(GameMode.ADVENTURE);
+        }
+        for(Player p : owningSession.GetSpectators()){
+            p.setGameMode(GameMode.SPECTATOR);
+        }
     }
 
     @Override

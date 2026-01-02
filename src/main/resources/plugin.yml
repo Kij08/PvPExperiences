@@ -15,6 +15,12 @@ commands:
     permission: PvPExperiences.join
     aliases:
       - pp
+  pvpkit:
+    description: Command to create kits
+    usage: "Usage: /<command> [save|load]"
+    permission: PvPExperiences.edit
+    aliases:
+      - pk
 permissions:
   PvPExperiences.edit:
     description: Lets players access the editing suite

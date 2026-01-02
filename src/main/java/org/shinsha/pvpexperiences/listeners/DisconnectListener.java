@@ -11,7 +11,7 @@ public class DisconnectListener implements Listener {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e) {
         Player p = e.getPlayer();
-        if (!PvPExperiences.getPlugin().isPlayerEditing(p)) {
+        if (!PvPExperiences.getPlugin().mapManager.isPlayerEditing(p)) {
             return;
         }
 

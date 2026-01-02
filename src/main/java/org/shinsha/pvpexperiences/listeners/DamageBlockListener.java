@@ -9,7 +9,7 @@ import org.shinsha.pvpexperiences.PvPExperiences;
 public class DamageBlockListener implements Listener {
     @EventHandler
     public void onBlockDamage(BlockDamageEvent e){
-        if(PvPExperiences.getPlugin().isPlayerEditing(e.getPlayer())){
+        if(PvPExperiences.getPlugin().mapManager.isPlayerEditing(e.getPlayer())){
             e.setCancelled(true);
         }
     }

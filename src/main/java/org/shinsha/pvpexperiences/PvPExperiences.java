@@ -4,8 +4,12 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.shinsha.pvpexperiences.assetmanagers.Kit;
+import org.shinsha.pvpexperiences.assetmanagers.KitManager;
+import org.shinsha.pvpexperiences.assetmanagers.MapManager;
 import org.shinsha.pvpexperiences.assetmanagers.PvPMap;
 import org.shinsha.pvpexperiences.commands.PvPEditCommand;
+import org.shinsha.pvpexperiences.commands.PvPKitCommand;
 import org.shinsha.pvpexperiences.commands.PvPPlayCommand;
 import org.shinsha.pvpexperiences.listeners.*;
 import org.shinsha.pvpexperiences.sessions.SessionManager;
@@ -19,24 +23,30 @@ public class PvPExperiences extends JavaPlugin {
         return plugin;
     }
 
-    private HashMap<Player, PvPMap> editingPlayerMap;
     public HashMap<Player, ItemStack[]> InventoryMap;
     public SessionManager sessionManager;
+    public KitManager kitManager;
+    public MapManager mapManager;
 
     @Override
     public void onEnable() {
         plugin = this;
 
-        getLogger().info("onEnable is called!");
-        editingPlayerMap = new HashMap<>();
-        InventoryMap = new HashMap<>();
-
         //Serializable classes
         ConfigurationSerialization.registerClass(PvPMap.class);
+        ConfigurationSerialization.registerClass(Kit.class);
+
+        sessionManager = new SessionManager();
+        kitManager = new KitManager();
+        mapManager = new MapManager();
+
+        getLogger().info("onEnable is called!");
+        InventoryMap = new HashMap<>();
 
         //Commands
         getCommand("pvpedit").setExecutor(new PvPEditCommand());
         getCommand("pvpplay").setExecutor(new PvPPlayCommand());
+        getCommand("pvpkit").setExecutor(new PvPKitCommand());
 
         //Listeners
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
@@ -49,35 +59,6 @@ public class PvPExperiences extends JavaPlugin {
         //Setup config
         getConfig().options().copyDefaults();
         saveDefaultConfig();
-
-        sessionManager = new SessionManager();
-    }
-
-    public void RegisterEditingPlayer(Player p, PvPMap mapName){
-        editingPlayerMap.put(p, mapName);
-    }
-
-    public boolean isPlayerEditing(Player p){
-        return editingPlayerMap.containsKey(p);
-    }
-
-    public boolean isMapEditing(String mapName){
-
-        for(var map : editingPlayerMap.entrySet()){
-            if(map.getValue().getMapName().equals(mapName)){
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public PvPMap getEditingMap(Player p){
-        return editingPlayerMap.get(p);
-    }
-
-    public void EndEditingPlayer(Player p){
-        editingPlayerMap.remove(p);
     }
 
     public void StorePlayerInventory(Player p){

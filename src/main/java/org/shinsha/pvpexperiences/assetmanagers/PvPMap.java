@@ -14,6 +14,7 @@ import org.shinsha.pvpexperiences.PvPExperiences;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PvPMap implements ConfigurationSerializable {
@@ -22,18 +23,18 @@ public class PvPMap implements ConfigurationSerializable {
     private World world;
     private Location bound1;
     private Location bound2;
-    public ArrayList<Location> spawnLocations;
+    public List<Location> spawnLocations;
     boolean isEditing = false;
 
     private ArrayList<ItemDisplay> outlineEdges;
 
     public PvPMap(Map<String, Object> map) {
         // Deserialization constructor
-        mapName = (String) map.get("name");
+        mapName = (String) map.get("Name");
         world = Bukkit.getWorld((String) map.get("world"));
         bound1 = (Location) map.get("bound1");
         bound2 = (Location) map.get("bound2");
-        spawnLocations = (ArrayList<Location>) map.get("spawnLocations");
+        spawnLocations = (List<Location>) map.get("spawnLocations");
         outlineEdges = new ArrayList<>();
 
         recreateOutline();

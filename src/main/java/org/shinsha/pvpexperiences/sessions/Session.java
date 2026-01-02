@@ -3,6 +3,7 @@ package org.shinsha.pvpexperiences.sessions;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.shinsha.pvpexperiences.PvPExperiences;
 import org.shinsha.pvpexperiences.assetmanagers.MapManager;
 import org.shinsha.pvpexperiences.assetmanagers.PvPMap;
 import org.shinsha.pvpexperiences.files.FileFactory;
@@ -91,7 +92,7 @@ public class Session {
     protected void StartSession(String mapName, GameModes mode){
         if(mapName != null && mode != null){
 
-            activeMap = MapManager.GetMapFromFileName(mapName);
+            activeMap = PvPExperiences.getPlugin().mapManager.GetMapFromName(mapName);
             switch (mode){
                 case FFA -> {
                     runningGamemode = new FFAMode(this);
@@ -134,6 +135,14 @@ public class Session {
 
     public PvPMap GetMap() {
         return activeMap;
+    }
+
+    public ArrayList<Player> GetActivePlayers(){
+        return activePlayers;
+    }
+
+    public ArrayList<Player> GetSpectators(){
+        return spectators;
     }
 
 }

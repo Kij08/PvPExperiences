@@ -10,7 +10,7 @@ public class ItemPickupListener implements Listener {
     @EventHandler
     public void onItemPickup(EntityPickupItemEvent e){
         if(e.getEntity() instanceof Player p){
-            if(PvPExperiences.getPlugin().isPlayerEditing(p)){
+            if(PvPExperiences.getPlugin().mapManager.isPlayerEditing(p)){
                 e.setCancelled(true);
             }
         }
