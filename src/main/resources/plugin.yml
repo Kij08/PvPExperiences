@@ -11,7 +11,7 @@ commands:
       - pe
   pvpplay:
     description: Command to create, edit, and delete pvp regions
-    usage: "Usage: /<command> [create|join]"
+    usage: "Usage: /<command> [create|join|list|endgame|endsession]"
     permission: PvPExperiences.join
     aliases:
       - pp

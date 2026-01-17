@@ -7,6 +7,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.shinsha.pvpexperiences.PvPExperiences;
+import org.shinsha.pvpexperiences.sessions.Session;
 
 public class PvPPlayCommand implements CommandExecutor {
 
@@ -15,10 +16,10 @@ public class PvPPlayCommand implements CommandExecutor {
 
         if(commandSender instanceof Player p) {
             if (args.length == 0) {
-                p.sendMessage("Invalid arguements. /pvpplay [cl]");
+                p.sendMessage("Invalid arguements. /pvpplay [cs|join|list|eg|es]");
             } else {
                 switch (args[0]) {
-                    case "cl":
+                    case "cs":
                         Bukkit.broadcastMessage(ChatColor.GREEN + p.getName() + " is starting a lobby!\nType /pvpplay join playername to join!");
                         PvPExperiences.getPlugin().sessionManager.CreateSession(p);
                         break;
@@ -26,6 +27,14 @@ public class PvPPlayCommand implements CommandExecutor {
                         PvPExperiences.getPlugin().sessionManager.JoinSession(Bukkit.getPlayer(args[1]), p);
                         break;
                     case "list":
+                        break;
+                    case "eg":
+                    case "endgame":
+                        PvPExperiences.getPlugin().sessionManager.EndSessionGamemode(p);
+                        break;
+                    case "es":
+                    case "endsession":
+                        PvPExperiences.getPlugin().sessionManager.EndSession(p);
                         break;
                 }
             }

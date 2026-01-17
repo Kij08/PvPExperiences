@@ -12,10 +12,7 @@ import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.shinsha.pvpexperiences.PvPExperiences;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PvPMap implements ConfigurationSerializable {
 
@@ -203,5 +200,17 @@ public class PvPMap implements ConfigurationSerializable {
         serialisedMap.put("bound2", bound2);
         serialisedMap.put("spawnLocations", spawnLocations);
         return serialisedMap;
+    }
+
+    //Gamemode muite functions
+
+    public Location GetRandomSpawnLocation(){
+        Random r = new Random();
+        return spawnLocations.get(r.nextInt(spawnLocations.size())).clone().add(new Vector(0, 1, 0));
+    }
+
+    //TODO
+    public boolean inBounds(Player p){
+        return true;
     }
 }

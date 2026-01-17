@@ -33,6 +33,10 @@ public class Kit implements ConfigurationSerializable {
         return kitName;
     }
 
+    public void PopulatePlayerInventory(Inventory i) {
+        i.setContents(kitItems.toArray(new ItemStack[0]));
+    }
+
     @Override
     public final Map<String, Object> serialize(){
         Map<String, Object> serialisedMap = new HashMap<>();

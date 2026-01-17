@@ -1,14 +1,19 @@
 package org.shinsha.pvpexperiences.sessions;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.shinsha.pvpexperiences.PvPExperiences;
+import org.shinsha.pvpexperiences.assetmanagers.Kit;
 import org.shinsha.pvpexperiences.assetmanagers.MapManager;
 import org.shinsha.pvpexperiences.assetmanagers.PvPMap;
 import org.shinsha.pvpexperiences.files.FileFactory;
 import org.shinsha.pvpexperiences.gamemodes.FFAMode;
 import org.shinsha.pvpexperiences.gamemodes.GameModeBase;
+import org.shinsha.pvpexperiences.gamemodes.Quake;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +31,24 @@ enum GameModes{
     TeamBattle,
     Jousting1v1,
     JoustingTournament,
+    Quake,
     MAX
+}
+
+//Data for the player before they joined the session
+class PrevPlayerData{
+
+    PrevPlayerData(ItemStack[] i, Location loc, float e, GameMode m){
+        inventory = i;
+        location = loc;
+        expLvl = e;
+        mode = m;
+    }
+
+    ItemStack[] inventory;
+    Location location;
+    float expLvl;
+    GameMode mode;
 }
 
 public class Session {
@@ -38,20 +60,21 @@ public class Session {
     private ArrayList<Player> spectators;
     private GameModeBase runningGamemode;
     private PvPMap activeMap;
+    private Kit activeKit;
 
-    //Original player inventories
-    public HashMap<Player, ItemStack[]> InventoryMap;
-
+    //Original player data
+    public HashMap<Player, PrevPlayerData> playerData;
 
     protected Session(Player p){
         state = SessionState.LOBBY;
         activePlayers = new ArrayList<>();
         spectators = new ArrayList<>();
-        spectators.add(p);
+        playerData = new HashMap<>();
         owner = p;
         activeLobby = new Lobby(this);
-        p.openInventory(activeLobby.getInv());
-        activeLobby.UpdatePlayerLists(activePlayers, spectators);
+
+        //Join the session for the owner
+        JoinSession(p);
     }
 
     //Gets the player that owns this session
@@ -63,7 +86,7 @@ public class Session {
         state = ns;
     }
 
-    protected SessionState getSessionState() {
+    public SessionState getSessionState() {
         return state;
     }
 
@@ -73,8 +96,16 @@ public class Session {
     }
 
     protected void JoinSession(Player p){
+        //Store previous info
+        playerData.put(p, new PrevPlayerData(p.getInventory().getContents(), p.getLocation(), p.getExp(), p.getGameMode()));
+
+
         spectators.add(p);
         p.openInventory(activeLobby.getInv());
+        p.setInvulnerable(true);
+        p.getInventory().clear();
+
+        activeLobby.UpdatePlayerLists(activePlayers, spectators);
     }
 
     protected void JoinActivePlayers(Player p){
@@ -89,7 +120,7 @@ public class Session {
         activeLobby.UpdatePlayerLists(activePlayers, spectators);
     }
 
-    protected void StartSession(String mapName, GameModes mode){
+    protected void StartSession(String mapName, GameModes mode, String kitName){
         if(mapName != null && mode != null){
 
             activeMap = PvPExperiences.getPlugin().mapManager.GetMapFromName(mapName);
@@ -103,14 +134,22 @@ public class Session {
                 }
                 case JoustingTournament -> {
                 }
+                case Quake -> {
+                    runningGamemode = new Quake(this);
+                }
                 case MAX -> {
                 }
             }
 
+            //Set a kit if we selected one. If not then kit is null and the players inventory will not be changed.
+            if(!kitName.equals("No Kit")) {
+                activeKit = PvPExperiences.getPlugin().kitManager.GetKitFromName(kitName);
+            }
 
             if(activeMap != null && runningGamemode != null && runningGamemode.CanStartGame()){
                 for(Player p : GetPlayerList()){
                     p.closeInventory();
+                    p.setInvulnerable(false);
                 }
                 state = SessionState.INGAME;
                 runningGamemode.StartGame();
@@ -121,7 +160,47 @@ public class Session {
         }
     }
 
-    protected boolean isPlayerInSession(Player p){
+    protected void EndSessionGamemode(){
+        runningGamemode.EndGame();
+        setSessionState(SessionState.LOBBY);
+
+        for(Player p : activePlayers){
+            ResetPlayer(p);
+        }
+        for(Player p : spectators){
+            ResetPlayer(p);
+        }
+
+        for(Player p : activePlayers){
+            p.openInventory(activeLobby.getInv());
+        }
+        for(Player p : spectators){
+            p.openInventory(activeLobby.getInv());
+        }
+    }
+
+    protected void EndSession(){
+        runningGamemode.EndGame();
+        for(Player p : activePlayers){
+            ResetPlayer(p);
+        }
+        for(Player p : spectators){
+            ResetPlayer(p);
+        }
+    }
+
+    private void ResetPlayer(Player p){
+        PrevPlayerData data = playerData.get(p);
+        Bukkit.broadcastMessage("Data" + playerData.size());
+        if(data != null){
+            p.getInventory().setContents(data.inventory);
+            p.teleport(data.location);
+            p.setExp(data.expLvl);
+            p.setGameMode(data.mode);
+        }
+    }
+
+    public boolean isPlayerInSession(Player p){
         return activePlayers.contains(p) || spectators.contains(p);
     }
 
@@ -135,6 +214,10 @@ public class Session {
 
     public PvPMap GetMap() {
         return activeMap;
+    }
+
+    public Kit GetKit(){
+        return activeKit;
     }
 
     public ArrayList<Player> GetActivePlayers(){

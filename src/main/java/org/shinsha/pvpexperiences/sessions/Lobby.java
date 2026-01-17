@@ -15,8 +15,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.shinsha.pvpexperiences.PvPExperiences;
-import org.shinsha.pvpexperiences.assetmanagers.MapManager;
-import org.shinsha.pvpexperiences.listeners.DisconnectListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -74,7 +72,8 @@ public class Lobby implements Listener {
         mainInv.setItem(MapSlot, createGuiItem(Material.MAP, "Select Map..."));
 
         //Kits
-        int kitIndex = 0;
+        kitListInv.setItem(0, createGuiItem(Material.DIAMOND_SWORD, "No Kit", "Take your own gear into battle."));
+        int kitIndex = 1;
         for(String kit : PvPExperiences.getPlugin().kitManager.GetKitNames()){
             kitListInv.setItem(kitIndex, createGuiItem(Material.DIAMOND_SWORD, kit, "Kit description."));
             kitIndex++;
@@ -208,7 +207,7 @@ public class Lobby implements Listener {
         if(p == owningSession.getOwner()){
             switch(clickedItem.getType()){
                 case GREEN_WOOL:
-                    owningSession.StartSession(selectedMapName, selectedMode);
+                    owningSession.StartSession(selectedMapName, selectedMode, selectedKitName);
                     break;
                 case DIAMOND_SWORD:
                     if(state == MenuState.Main) {

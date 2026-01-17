@@ -5,15 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.shinsha.pvpexperiences.files.FileFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SessionManager {
     private HashMap<Player, Session> activeSessions;
@@ -48,6 +40,14 @@ public class SessionManager {
             }
         }
         return playerInSession;
+    }
+
+    public void EndSessionGamemode(Player owner){
+        activeSessions.get(owner).EndSessionGamemode();
+    }
+
+    public void EndSession(Player owner){
+        activeSessions.get(owner).EndSession();
     }
 
 }

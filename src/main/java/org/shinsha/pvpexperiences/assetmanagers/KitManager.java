@@ -44,4 +44,8 @@ public class KitManager {
         //Add to registry
         KitRegistry.put(k.GetKitName(), k);
     }
+
+    public Kit GetKitFromName(String name){
+        return KitRegistry.get(name);
+    }
 }
