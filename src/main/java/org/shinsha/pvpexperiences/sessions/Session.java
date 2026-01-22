@@ -4,16 +4,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.shinsha.pvpexperiences.PvPExperiences;
 import org.shinsha.pvpexperiences.assetmanagers.Kit;
-import org.shinsha.pvpexperiences.assetmanagers.MapManager;
 import org.shinsha.pvpexperiences.assetmanagers.PvPMap;
-import org.shinsha.pvpexperiences.files.FileFactory;
 import org.shinsha.pvpexperiences.gamemodes.FFAMode;
 import org.shinsha.pvpexperiences.gamemodes.GameModeBase;
 import org.shinsha.pvpexperiences.gamemodes.Quake;
+import org.shinsha.pvpexperiences.gamemodes.modifiers.HideNametags;
+import org.shinsha.pvpexperiences.gamemodes.modifiers.ModifierBase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +33,7 @@ enum GameModes{
     Quake,
     MAX
 }
+
 
 //Data for the player before they joined the session
 class PrevPlayerData{
@@ -120,13 +120,13 @@ public class Session {
         activeLobby.UpdatePlayerLists(activePlayers, spectators);
     }
 
-    protected void StartSession(String mapName, GameModes mode, String kitName){
+    protected void StartSession(String mapName, GameModes mode, String kitName, ArrayList<Modifiers> mods){
         if(mapName != null && mode != null){
 
             activeMap = PvPExperiences.getPlugin().mapManager.GetMapFromName(mapName);
             switch (mode){
                 case FFA -> {
-                    runningGamemode = new FFAMode(this);
+                    runningGamemode = new FFAMode(this, mods);
                 }
                 case TeamBattle -> {
                 }
@@ -135,15 +135,18 @@ public class Session {
                 case JoustingTournament -> {
                 }
                 case Quake -> {
-                    runningGamemode = new Quake(this);
+                    runningGamemode = new Quake(this, mods);
                 }
                 case MAX -> {
                 }
             }
 
-            //Set a kit if we selected one. If not then kit is null and the players inventory will not be changed.
-            if(!kitName.equals("No Kit")) {
-                activeKit = PvPExperiences.getPlugin().kitManager.GetKitFromName(kitName);
+            activeKit = runningGamemode.GetKitOverride();
+            if(runningGamemode.GetKitOverride() == null){
+                //Set a kit if we selected one and there is no kit override. If not then kit is null and the players inventory will not be changed.
+                if(!kitName.equals("No Kit")) {
+                    activeKit = PvPExperiences.getPlugin().kitManager.GetKitFromName(kitName);
+                }
             }
 
             if(activeMap != null && runningGamemode != null && runningGamemode.CanStartGame()){

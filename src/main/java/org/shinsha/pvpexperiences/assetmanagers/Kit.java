@@ -22,7 +22,12 @@ public class Kit implements ConfigurationSerializable {
     }
 
     public Kit(String name){
+        kitItems = new ArrayList<>();
         kitName = name;
+    }
+
+    public void AddItemToKit(ItemStack itemToAdd, int slot){
+        kitItems.add(slot, itemToAdd);
     }
 
     public void SaveInventoryToKit(Inventory inv){

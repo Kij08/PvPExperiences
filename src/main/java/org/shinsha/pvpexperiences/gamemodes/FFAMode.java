@@ -15,6 +15,8 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.*;
 import org.shinsha.pvpexperiences.PvPExperiences;
 import org.shinsha.pvpexperiences.assetmanagers.Kit;
+import org.shinsha.pvpexperiences.gamemodes.modifiers.ModifierBase;
+import org.shinsha.pvpexperiences.sessions.Modifiers;
 import org.shinsha.pvpexperiences.sessions.Session;
 
 import java.util.ArrayList;
@@ -30,11 +32,17 @@ public class FFAMode extends GameModeBase implements Listener {
         super(s);
     }
 
+    public FFAMode(Session s, ArrayList<Modifiers> mods){
+        super(s, mods);
+    }
+
     @Override
     public void StartGame(){
+
         persistentTasks = new ArrayList<>();
         statMap = new HashMap<>();
         InitScoreboard();
+        GivePlayerKits();
 
         int scoreLine = 1;
         for(Player p : owningSession.GetActivePlayers()){
@@ -43,11 +51,6 @@ public class FFAMode extends GameModeBase implements Listener {
             p.setHealth(20);
             p.setFoodLevel(20);
             p.teleport(owningSession.GetMap().GetRandomSpawnLocation());
-
-            Kit k = owningSession.GetKit();
-            if(k != null){
-                k.PopulatePlayerInventory(p.getInventory());
-            }
 
             //Start repeatable task for detecting out of bounds
             BukkitTask taskId = Bukkit.getServer().getScheduler().runTaskTimer(PvPExperiences.getPlugin(), new Runnable() {
@@ -76,6 +79,8 @@ public class FFAMode extends GameModeBase implements Listener {
         }
 
         PvPExperiences.getPlugin().getServer().getPluginManager().registerEvents(this, PvPExperiences.getPlugin());
+
+        SetupModifiers();
     }
 
     @Override
@@ -96,6 +101,11 @@ public class FFAMode extends GameModeBase implements Listener {
     @Override
     public boolean CanStartGame(){
         return true;
+    }
+
+    @Override
+    public Scoreboard GetModeScoreboard(){
+        return scoreboard;
     }
 
     private void InitScoreboard(){
@@ -143,6 +153,11 @@ public class FFAMode extends GameModeBase implements Listener {
         if(owningSession.isPlayerInSession(e.getPlayer())) {
             e.setRespawnLocation(owningSession.GetMap().GetRandomSpawnLocation());
 
+            Kit k = owningSession.GetKit();
+            if(k != null){
+                k.PopulatePlayerInventory(e.getPlayer().getInventory());
+            }
+
             //2 seconds of spawn protection
             e.getPlayer().setInvulnerable(true);
 
@@ -151,16 +166,6 @@ public class FFAMode extends GameModeBase implements Listener {
                     e.getPlayer().setInvulnerable(false);
                 }
             }, 2L * 20L);
-        }
-    }
-
-    @EventHandler
-    public void onFoodLevelChange(FoodLevelChangeEvent e){
-        HumanEntity p = e.getEntity();
-
-        if(owningSession.isPlayerInSession((Player) p)){
-            e.setCancelled(true);
-            p.setFoodLevel(20);
         }
     }
 }

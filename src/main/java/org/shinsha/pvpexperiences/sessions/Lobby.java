@@ -3,6 +3,7 @@ package org.shinsha.pvpexperiences.sessions;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -27,7 +28,8 @@ public class Lobby implements Listener {
         Main,
         Kit,
         Mode,
-        Map
+        Map,
+        Modifier
     }
 
     private MenuState state;
@@ -36,10 +38,12 @@ public class Lobby implements Listener {
     private Inventory mapListInv;
     private Inventory modeListInv;
     private Inventory kitListInv;
+    private Inventory modifierListInv;
 
     private String selectedMapName;
     private GameModes selectedMode;
     private String selectedKitName;
+    private ArrayList<Modifiers> selectedModifiers;
 
     public Inventory getInv(){
         return mainInv;
@@ -47,27 +51,31 @@ public class Lobby implements Listener {
 
     public Lobby(Session session){
         owningSession = session;
+        selectedModifiers = new ArrayList<>();
 
         mainInv = Bukkit.createInventory(null, 36, ChatColor.RED + "Lobby");
         kitListInv = Bukkit.createInventory(null, 18, ChatColor.RED + "Kits");
         mapListInv = Bukkit.createInventory(null, 18, ChatColor.RED + "Maps");
         modeListInv = Bukkit.createInventory(null, 18, ChatColor.RED + "Modes");
+        modifierListInv = Bukkit.createInventory(null, 18, ChatColor.RED + "Modifers");
         InitLobby();
 
         PvPExperiences.getPlugin().getServer().getPluginManager().registerEvents(this, PvPExperiences.getPlugin());
         state = MenuState.Main;
     }
 
-    final int KitSlot = 6;
-    final int ModeSlot = 7;
+    final int KitSlot = 5;
+    final int ModifierSlot = 7;
+    final int ModeSlot = 6;
     final int MapSlot = 8;
 
     private void InitLobby(){
         mainInv.setItem(0, createGuiItem(Material.PLAYER_HEAD, "Players", "Active player list."));
         mainInv.setItem(18, createGuiItem(Material.OPEN_EYEBLOSSOM, "Spectators", "Spectator list."));
-        mainInv.setItem(35, createGuiItem(Material.GREEN_WOOL, "Begin Match"));
-        mainInv.setItem(34, createGuiItem(Material.RED_WOOL, "Quit Lobby"));
+        mainInv.setItem(35, createGuiItem(Material.GREEN_WOOL, ChatColor.GREEN + "Begin Match"));
+        mainInv.setItem(34, createGuiItem(Material.RED_WOOL, ChatColor.RED + "Quit Lobby"));
         mainInv.setItem(KitSlot, createGuiItem(Material.DIAMOND_SWORD, "Select Kit..."));
+        mainInv.setItem(ModifierSlot, createGuiItem(Material.BLAZE_POWDER, "Select Modifiers..."));
         mainInv.setItem(ModeSlot, createGuiItem(Material.REDSTONE, "Select Mode..."));
         mainInv.setItem(MapSlot, createGuiItem(Material.MAP, "Select Map..."));
 
@@ -78,7 +86,7 @@ public class Lobby implements Listener {
             kitListInv.setItem(kitIndex, createGuiItem(Material.DIAMOND_SWORD, kit, "Kit description."));
             kitIndex++;
         }
-        kitListInv.setItem(17, createGuiItem(Material.RED_WOOL, "Return"));
+        kitListInv.setItem(17, createGuiItem(Material.RED_WOOL, ChatColor.RED + "Return"));
 
 
         //Maps
@@ -87,13 +95,18 @@ public class Lobby implements Listener {
             mapListInv.setItem(mapIndex, createGuiItem(Material.MAP, map, "Map description."));
             mapIndex++;
         }
-        mapListInv.setItem(17, createGuiItem(Material.RED_WOOL, "Return"));
+        mapListInv.setItem(17, createGuiItem(Material.RED_WOOL, ChatColor.RED + "Return"));
 
         modeListInv.setItem(GameModes.FFA.ordinal(), createGuiItem(Material.REDSTONE, "FFA"));
-        modeListInv.setItem(GameModes.TeamBattle.ordinal(), createGuiItem(Material.REDSTONE, "Team Battle"));
-        modeListInv.setItem(GameModes.Jousting1v1.ordinal(), createGuiItem(Material.REDSTONE, "Jousting Versus"));
-        modeListInv.setItem(GameModes.JoustingTournament.ordinal(), createGuiItem(Material.REDSTONE, "Jousting Tournament"));
+        modeListInv.setItem(GameModes.Quake.ordinal(), createGuiItem(Material.REDSTONE, "Quake- WIP"));
+        modeListInv.setItem(GameModes.TeamBattle.ordinal(), createGuiItem(Material.REDSTONE, "Team Battle- WIP"));
+        modeListInv.setItem(GameModes.Jousting1v1.ordinal(), createGuiItem(Material.REDSTONE, "Jousting Versus- WIP"));
+        modeListInv.setItem(GameModes.JoustingTournament.ordinal(), createGuiItem(Material.REDSTONE, "Jousting Tournament- WIP"));
         modeListInv.setItem(17, createGuiItem(Material.RED_WOOL, "Return"));
+
+        modifierListInv.setItem(Modifiers.OldPvp.ordinal(), createGuiItem(Material.BLAZE_POWDER, ChatColor.RED + "1.8 Pvp"));
+        modifierListInv.setItem(Modifiers.HideNametags.ordinal(), createGuiItem(Material.BLAZE_POWDER, ChatColor.RED + "Hide Nametags"));
+        modifierListInv.setItem(17, createGuiItem(Material.RED_WOOL, ChatColor.RED + "Return"));
     }
 
     // Nice little method to create a gui item with a custom name, and description
@@ -144,6 +157,25 @@ public class Lobby implements Listener {
         mainInv.getItem(ModeSlot).setItemMeta(meta);
     }
 
+    private void UpdateModifierSelection(int selectedSlot){
+        //If there are no enchants on the item enchant it and add it to the slected list
+        //If it has enchants remove it
+        if(!selectedModifiers.contains(Modifiers.values()[selectedSlot])/*!modifierListInv.getItem(selectedSlot).getItemMeta().hasEnchantmentGlintOverride()*/){
+            selectedModifiers.add(Modifiers.values()[selectedSlot]);
+            ItemMeta meta = modifierListInv.getItem(selectedSlot).getItemMeta();
+            meta.setEnchantmentGlintOverride(true);
+            meta.setDisplayName(ChatColor.GREEN + ChatColor.stripColor(meta.getDisplayName()));
+            modifierListInv.getItem(selectedSlot).setItemMeta(meta);
+        }
+        else{
+            selectedModifiers.remove(Modifiers.values()[selectedSlot]);
+            ItemMeta meta = modifierListInv.getItem(selectedSlot).getItemMeta();
+            meta.setEnchantmentGlintOverride(false);
+            meta.setDisplayName(ChatColor.RED + ChatColor.stripColor(meta.getDisplayName()));
+            modifierListInv.getItem(selectedSlot).setItemMeta(meta);
+        }
+    }
+
     public ItemStack createSkullItem(Player p) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) item.getItemMeta();
@@ -164,6 +196,9 @@ public class Lobby implements Listener {
                 break;
             case MenuState.Map:
                 p.openInventory(mapListInv);
+                break;
+            case MenuState.Modifier:
+                p.openInventory(modifierListInv);
                 break;
             default:
                 p.openInventory(mainInv);
@@ -190,7 +225,7 @@ public class Lobby implements Listener {
     // Check for clicks on items
     @EventHandler
     public void onInventoryClick(final InventoryClickEvent e) {
-        if (!(e.getInventory().equals(mainInv) || e.getInventory().equals(mapListInv) || e.getInventory().equals(modeListInv) || e.getInventory().equals(kitListInv))) {
+        if (!(e.getInventory().equals(mainInv) || e.getInventory().equals(mapListInv) || e.getInventory().equals(modeListInv) || e.getInventory().equals(kitListInv) || e.getInventory().equals(modifierListInv))) {
             return;
         }
 
@@ -207,7 +242,7 @@ public class Lobby implements Listener {
         if(p == owningSession.getOwner()){
             switch(clickedItem.getType()){
                 case GREEN_WOOL:
-                    owningSession.StartSession(selectedMapName, selectedMode, selectedKitName);
+                    owningSession.StartSession(selectedMapName, selectedMode, selectedKitName, selectedModifiers);
                     break;
                 case DIAMOND_SWORD:
                     if(state == MenuState.Main) {
@@ -236,6 +271,14 @@ public class Lobby implements Listener {
                         UpdateModeName(selectedMode.toString());
                     }
                     break;
+                case BLAZE_POWDER:
+                    if(state == MenuState.Main) {
+                        OpenWindow(p, MenuState.Modifier);
+                    }
+                    else{
+                        UpdateModifierSelection(e.getRawSlot());
+                    }
+                    break;
             }
         }
 
@@ -260,14 +303,14 @@ public class Lobby implements Listener {
     // Cancel dragging in our inventory
     @EventHandler
     public void onInventoryDrag(final InventoryDragEvent e) {
-        if (e.getInventory().equals(mainInv) || e.getInventory().equals(mapListInv) || e.getInventory().equals(modeListInv) || e.getInventory().equals(kitListInv)) {
+        if (e.getInventory().equals(mainInv) || e.getInventory().equals(mapListInv) || e.getInventory().equals(modeListInv) || e.getInventory().equals(kitListInv) || e.getInventory().equals(modifierListInv)) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onInventoryClose(final InventoryCloseEvent e){
-        if (e.getInventory().equals(mainInv) || e.getInventory().equals(mapListInv) || e.getInventory().equals(modeListInv) || e.getInventory().equals(kitListInv)) {
+        if (e.getInventory().equals(mainInv) || e.getInventory().equals(mapListInv) || e.getInventory().equals(modeListInv) || e.getInventory().equals(kitListInv) || e.getInventory().equals(modifierListInv)) {
             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(PvPExperiences.getPlugin(), new Runnable() {
                 public void run() {
                     if(owningSession.getSessionState() == SessionState.LOBBY){
