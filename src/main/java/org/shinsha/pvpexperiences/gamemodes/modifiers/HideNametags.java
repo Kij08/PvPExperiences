@@ -20,4 +20,9 @@ public class HideNametags extends ModifierBase {
         }
     }
 
+    @Override
+    public void CleanupModifier() {
+
+    }
+
 }

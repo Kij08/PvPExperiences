@@ -46,6 +46,7 @@ public class Quake extends GameModeBase implements Listener {
     @Override
     public void EndGame() {
         HandlerList.unregisterAll(this);
+        CleanupModifiers();
     }
 
     @Override

@@ -96,6 +96,7 @@ public class FFAMode extends GameModeBase implements Listener {
         }
 
         HandlerList.unregisterAll(this);
+        CleanupModifiers();
     }
 
     @Override

@@ -84,6 +84,13 @@ public abstract class GameModeBase {
         }
     }
 
+    protected void CleanupModifiers(){
+        for(ModifierBase m : modifiers){
+            m.CleanupModifier();
+        }
+        modifiers.clear();
+    }
+
     protected void GivePlayerKits() {
         for (Player p : owningSession.GetActivePlayers()) {
             Kit k = owningSession.GetKit();
